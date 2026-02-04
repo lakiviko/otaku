@@ -1,0 +1,24 @@
+{
+  "name": "Otaku Catalog",
+  "short_name": "Otaku",
+  "lang": "ru",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050913",
+  "theme_color": "#0c1628",
+  "description": "Личный каталог фильмов, сериалов и аниме на базе TMDB",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

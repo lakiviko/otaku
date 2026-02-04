@@ -1,0 +1,14 @@
+{ // TEST
+    "name": "Мое любимое аниме",
+    "overview": "Список моего любимого аниме",
+    "lists": [
+        {
+            "name": "Тема 1",
+            "overview": "Описание темы 1",
+            "items": [
+                "tv/46260", // Naruto
+                "tv/31910" // Naruto: Shippuuden
+            ]
+        }
+    ]
+}
