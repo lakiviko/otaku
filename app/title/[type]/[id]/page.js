@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import ImageLightbox from "@/components/image-lightbox";
 
 export default function TitlePage({ params }) {
   const { type, id } = use(params);
   const [status, setStatus] = useState("Загружаю карточку...");
   const [data, setData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -53,6 +56,24 @@ export default function TitlePage({ params }) {
   const mediaBackdrops = data.popularMedia?.backdrops || [];
   const recommendations = data.recommendations || [];
   const copyValue = `${type}/${id}`;
+  const slides = [
+    data.poster ? { src: toOriginalImage(data.poster), alt: data.title, caption: `${data.title} — постер` } : null,
+    ...mediaBackdrops.map((item, index) => ({
+      src: toOriginalImage(item.image),
+      alt: `Кадр ${index + 1}`,
+      caption: `Популярные медиа #${index + 1}`
+    })),
+    ...recommendations
+      .filter((item) => item.poster)
+      .map((item) => ({
+        src: toOriginalImage(item.poster),
+        alt: item.title || "Рекомендация",
+        caption: `Рекомендация: ${item.title || "Без названия"}`
+      }))
+  ].filter(Boolean);
+  const posterSlideIndex = 0;
+  const mediaStartIndex = data.poster ? 1 : 0;
+  const recommendationsStartIndex = mediaStartIndex + mediaBackdrops.length;
 
   async function copyTitlePath() {
     try {
@@ -62,6 +83,12 @@ export default function TitlePage({ params }) {
     } catch {
       // noop
     }
+  }
+
+  function openLightbox(index) {
+    if (!slides.length) return;
+    setLightboxIndex(Math.max(0, Math.min(index, slides.length - 1)));
+    setLightboxOpen(true);
   }
 
   return (
@@ -76,7 +103,13 @@ export default function TitlePage({ params }) {
       <section className="details">
         <div className="details-backdrop" style={{ backgroundImage: `url('${data.backdrop || data.poster || ""}')` }}>
           <div className="details-head">
-            <img className="details-poster" src={data.poster || "/icons/placeholder-poster.svg"} alt={data.title} />
+            {data.poster ? (
+              <button type="button" className="image-trigger" onClick={() => openLightbox(posterSlideIndex)}>
+                <img className="details-poster" src={data.poster} alt={data.title} />
+              </button>
+            ) : (
+              <img className="details-poster" src="/icons/placeholder-poster.svg" alt={data.title} />
+            )}
             <div>
               <h2 className="details-title">{data.title} ({year})</h2>
               <p className="details-sub">{data.originalTitle || ""}{data.tagline ? ` • ${data.tagline}` : ""}</p>
@@ -149,7 +182,9 @@ export default function TitlePage({ params }) {
             <h3>Популярные медиа</h3>
             <div className="media-grid">
               {mediaBackdrops.map((item, index) => (
-                <img key={`backdrop-${index}`} src={item.image || "/icons/placeholder-poster.svg"} alt={`Кадр ${index + 1}`} loading="lazy" />
+                <button key={`backdrop-${index}`} type="button" className="image-trigger media-trigger" onClick={() => openLightbox(mediaStartIndex + index)}>
+                  <img src={item.image || "/icons/placeholder-poster.svg"} alt={`Кадр ${index + 1}`} loading="lazy" />
+                </button>
               ))}
               {mediaVideos.map((video) => (
                 <a key={video.id} href={video.youtubeUrl} className="media-video" target="_blank" rel="noreferrer">
@@ -167,7 +202,24 @@ export default function TitlePage({ params }) {
               {recommendations.length
                 ? recommendations.map((item) => (
                     <Link href={`/title/${type}/${item.id}`} className="recommendation-card" key={item.id}>
-                      <img src={item.poster || "/icons/placeholder-poster.svg"} alt={item.title || "Рекомендация"} loading="lazy" />
+                      {item.poster ? (
+                        <button
+                          type="button"
+                          className="image-trigger recommendation-image-trigger"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const recommendationPosterIndex = recommendations
+                              .filter((candidate) => candidate.poster)
+                              .findIndex((candidate) => candidate.id === item.id);
+                            openLightbox(recommendationsStartIndex + Math.max(recommendationPosterIndex, 0));
+                          }}
+                        >
+                          <img src={item.poster} alt={item.title || "Рекомендация"} loading="lazy" />
+                        </button>
+                      ) : (
+                        <img src="/icons/placeholder-poster.svg" alt={item.title || "Рекомендация"} loading="lazy" />
+                      )}
                       <div>
                         <h4>{item.title || "Без названия"}</h4>
                         <p>{item.year || "—"} • ★ {formatNumber(item.rating, 1)}</p>
@@ -179,6 +231,15 @@ export default function TitlePage({ params }) {
           </section>
         </div>
       </section>
+
+      <ImageLightbox
+        slides={slides}
+        open={lightboxOpen}
+        index={lightboxIndex}
+        onClose={() => setLightboxOpen(false)}
+        onPrev={() => setLightboxIndex((prev) => (prev - 1 + slides.length) % slides.length)}
+        onNext={() => setLightboxIndex((prev) => (prev + 1) % slides.length)}
+      />
     </main>
   );
 }
@@ -192,4 +253,11 @@ function trimText(value, maxLen) {
 function formatNumber(value, digits) {
   if (typeof value !== "number") return "—";
   return value.toLocaleString("ru-RU", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function toOriginalImage(url) {
+  if (!url) return url;
+  const match = String(url).match(/^\/api\/image\/[^/]+\/(.+)$/);
+  if (!match) return url;
+  return `/api/image/original/${match[1]}`;
 }
