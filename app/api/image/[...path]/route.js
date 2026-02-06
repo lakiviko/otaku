@@ -3,14 +3,15 @@ import { getProxiedImage } from "@/lib/tmdb";
 
 export const runtime = "nodejs";
 
-export async function GET(_request, { params }) {
+export async function GET(request, { params }) {
   try {
     const { path } = await params;
     if (!Array.isArray(path) || path.length < 2) {
       return NextResponse.json({ error: "invalid image path" }, { status: 400 });
     }
 
-    const image = await getProxiedImage(path);
+    const userAgent = request.headers.get("user-agent") || "";
+    const image = await getProxiedImage(path, userAgent);
     return new NextResponse(image.data, {
       headers: {
         "Content-Type": image.contentType,
