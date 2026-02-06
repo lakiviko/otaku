@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import { PageHeader } from "@/components/header-context";
 
 export default function CastPage({ params }) {
   const { type, id } = use(params);
@@ -34,26 +35,18 @@ export default function CastPage({ params }) {
 
   if (!data) {
     return (
-      <main className="app">
-        <header className="hero">
-          <Link href={`/title/${type}/${id}`} className="badge">← Назад к тайтлу</Link>
+      <main>
+        <PageHeader eyebrow="Каст" title="Загрузка..." />
+        <section className="results-wrap">
           <p className="status">{status}</p>
-        </header>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Cast</p>
-        <h1>{data.title}</h1>
-        <div className="badges">
-          <Link href={`/title/${type}/${id}`} className="badge">← К тайтлу</Link>
-          <span className="badge">{data.mediaType === "tv" ? "Сериал" : "Фильм"}</span>
-        </div>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Каст" title={data.title} />
       <section className="details">
         <div className="details-content">
           <h3>Актеры</h3>

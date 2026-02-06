@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PageHeader } from "@/components/header-context";
 
 export default function SearchClientPage() {
   const router = useRouter();
@@ -56,20 +57,20 @@ export default function SearchClientPage() {
   }
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Otaku Catalog</p>
-        <h1>Поиск фильмов, сериалов и людей</h1>
-        <div className="badges">
-          <Link href="/" className="badge">Мои полки</Link>
-        </div>
-        <form className="search" onSubmit={onSubmit}>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder="One Piece, Arcane, DiCaprio" required minLength={2} />
+    <main>
+      <PageHeader eyebrow="Поиск" title="Поиск фильмов, сериалов и людей" />
+      <section className="results-wrap">
+        <form className="search search-inline mobile-only" onSubmit={onSubmit}>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            type="search"
+            placeholder="One Piece, Arcane, DiCaprio"
+            required
+            minLength={2}
+          />
           <button type="submit">Найти</button>
         </form>
-      </header>
-
-      <section className="results-wrap">
         <p className="status">{status}</p>
         <div className="results">
           {results.map((item) => {

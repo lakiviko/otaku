@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import ImageLightbox from "@/components/image-lightbox";
+import { PageHeader } from "@/components/header-context";
 
 export default function TitlePage({ params }) {
   const { type, id } = use(params);
@@ -37,11 +38,11 @@ export default function TitlePage({ params }) {
 
   if (!data) {
     return (
-      <main className="app">
-        <header className="hero">
-          <Link href="/" className="badge">← Назад к поиску</Link>
+      <main>
+        <PageHeader eyebrow="Тайтл" title="Загрузка..." />
+        <section className="results-wrap">
           <p className="status">{status}</p>
-        </header>
+        </section>
       </main>
     );
   }
@@ -52,7 +53,7 @@ export default function TitlePage({ params }) {
   const countries = (data.countries || []).map((country) => country.name).join(", ") || "—";
   const runtime = data.runtime ? `${data.runtime} мин` : "—";
   const topCast = data.cast || [];
-  const mediaVideos = data.popularMedia?.videos || [];
+  const mediaVideos = [];
   const mediaBackdrops = data.popularMedia?.backdrops || [];
   const recommendations = data.recommendations || [];
   const copyValue = `${type}/${id}`;
@@ -62,18 +63,10 @@ export default function TitlePage({ params }) {
       src: toOriginalImage(item.image),
       alt: `Кадр ${index + 1}`,
       caption: `Популярные медиа #${index + 1}`
-    })),
-    ...recommendations
-      .filter((item) => item.poster)
-      .map((item) => ({
-        src: toOriginalImage(item.poster),
-        alt: item.title || "Рекомендация",
-        caption: `Рекомендация: ${item.title || "Без названия"}`
-      }))
+    }))
   ].filter(Boolean);
   const posterSlideIndex = 0;
   const mediaStartIndex = data.poster ? 1 : 0;
-  const recommendationsStartIndex = mediaStartIndex + mediaBackdrops.length;
 
   async function copyTitlePath() {
     try {
@@ -92,14 +85,8 @@ export default function TitlePage({ params }) {
   }
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Title</p>
-        <h1>{data.title}</h1>
-        <Link href="/" className="badge">На Гравную</Link>
-        <Link href="/" className="badge">Перейти в поиск</Link>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Тайтл" title={data.title} />
       <section className="details">
         <div className="details-backdrop" style={{ backgroundImage: `url('${data.backdrop || data.poster || ""}')` }}>
           <div className="details-head">
@@ -149,7 +136,7 @@ export default function TitlePage({ params }) {
                           <div className="season-body">
                             <h4>{season.name || `Сезон ${season.seasonNumber}`}</h4>
                             <p>{season.episodeCount || "—"} серий • {(season.airDate || "").slice(0, 4) || "—"}</p>
-                            {season.overview ? <p>{trimText(season.overview, 140)}</p> : null}
+                            {season.overview ? <p className="season-overview">{season.overview}</p> : null}
                           </div>
                         </article>
                       </Link>
@@ -186,13 +173,7 @@ export default function TitlePage({ params }) {
                   <img src={item.image || "/icons/placeholder-poster.svg"} alt={`Кадр ${index + 1}`} loading="lazy" />
                 </button>
               ))}
-              {mediaVideos.map((video) => (
-                <a key={video.id} href={video.youtubeUrl} className="media-video" target="_blank" rel="noreferrer">
-                  <strong>{video.type}</strong>
-                  <span>{video.name}</span>
-                </a>
-              ))}
-              {!mediaBackdrops.length && !mediaVideos.length ? <p className="season-empty">Нет медиа.</p> : null}
+              {!mediaBackdrops.length ? <p className="season-empty">Нет медиа.</p> : null}
             </div>
           </section>
 
@@ -202,24 +183,7 @@ export default function TitlePage({ params }) {
               {recommendations.length
                 ? recommendations.map((item) => (
                     <Link href={`/title/${type}/${item.id}`} className="recommendation-card" key={item.id}>
-                      {item.poster ? (
-                        <button
-                          type="button"
-                          className="image-trigger recommendation-image-trigger"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            const recommendationPosterIndex = recommendations
-                              .filter((candidate) => candidate.poster)
-                              .findIndex((candidate) => candidate.id === item.id);
-                            openLightbox(recommendationsStartIndex + Math.max(recommendationPosterIndex, 0));
-                          }}
-                        >
-                          <img src={item.poster} alt={item.title || "Рекомендация"} loading="lazy" />
-                        </button>
-                      ) : (
-                        <img src="/icons/placeholder-poster.svg" alt={item.title || "Рекомендация"} loading="lazy" />
-                      )}
+                      <img src={item.poster || "/icons/placeholder-poster.svg"} alt={item.title || "Рекомендация"} loading="lazy" />
                       <div>
                         <h4>{item.title || "Без названия"}</h4>
                         <p>{item.year || "—"} • ★ {formatNumber(item.rating, 1)}</p>

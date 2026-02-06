@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import { PageHeader } from "@/components/header-context";
 
 export default function SeasonPage({ params }) {
   const { type, id, seasonNumber } = use(params);
@@ -46,26 +46,18 @@ export default function SeasonPage({ params }) {
 
   if (!season || !title) {
     return (
-      <main className="app">
-        <header className="hero">
-          <Link href={`/title/${type}/${id}`} className="badge">← Назад к тайтлу</Link>
+      <main>
+        <PageHeader eyebrow="Сезон" title="Загрузка..." />
+        <section className="results-wrap">
           <p className="status">{status}</p>
-        </header>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Season</p>
-        <h1>{title.title}</h1>
-        <div className="badges">
-          <Link href={`/title/${type}/${id}`} className="badge">← К тайтлу</Link>
-          <span className="badge">{season.name || `Сезон ${seasonNumber}`}</span>
-        </div>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Сезон" title={title.title} />
       <section className="details">
         <div className="details-content">
           <article className="season-details">

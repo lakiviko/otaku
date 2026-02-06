@@ -5,7 +5,7 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <main className="app">
+        <main>
           <section className="results-wrap">
             <p className="status">Загрузка...</p>
           </section>

@@ -52,10 +52,45 @@ a {
   backdrop-filter: blur(14px);
   background: linear-gradient(140deg, rgba(12, 22, 40, 0.9), rgba(10, 20, 40, 0.55));
   box-shadow: var(--shadow);
+  position: relative;
+}
+
+.site-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 24px;
+  align-items: center;
+}
+
+.hero-main {
+  display: grid;
+  gap: 0;
+}
+
+.search-toggle {
+  display: none;
+  border: 0;
+  padding: 8px;
+  background: transparent;
+  color: var(--text);
+  font: 700 13px/1 "Trebuchet MS", "Gill Sans", sans-serif;
+  cursor: pointer;
+  align-self: center;
+  justify-content: center;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .eyebrow {
-  margin: 0 0 10px;
+  margin: 0 0 2px;
   color: var(--accent);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -67,14 +102,8 @@ h1 {
   font-family: "Trebuchet MS", "Gill Sans", sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.05;
+  line-height: 1.02;
   font-size: clamp(1.8rem, 4vw, 2.7rem);
-}
-
-.subtitle {
-  margin: 14px 0 0;
-  max-width: 70ch;
-  color: var(--muted);
 }
 
 .search {
@@ -82,6 +111,19 @@ h1 {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
+  align-items: stretch;
+}
+
+.search.site-search {
+  margin-top: 0;
+}
+
+.search-inline {
+  margin-bottom: 16px;
+}
+
+.mobile-only {
+  display: none;
 }
 
 .search input {
@@ -101,6 +143,52 @@ h1 {
   color: #041221;
   font: 800 15px/1 "Trebuchet MS", "Gill Sans", sans-serif;
   cursor: pointer;
+  height: 100%;
+}
+
+
+@media (max-width: 720px) {
+  .mobile-only {
+    display: grid;
+  }
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .search-toggle {
+    display: inline-flex;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .site-search {
+    display: none;
+  }
+
+  .hero-main {
+    grid-column: 1 / 2;
+  }
+
+  .site-header.search-open .hero-main {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .site-header.search-open .search-toggle {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .site-header.search-open .site-search {
+    display: grid;
+    position: absolute;
+    inset: 22px;
+    align-content: center;
+    z-index: 2;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
 }
 
 .results-wrap {
@@ -139,7 +227,7 @@ h1 {
 
 .results {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 14px;
 }
 
@@ -315,6 +403,16 @@ h1 {
   gap: 10px;
 }
 
+.shelf-section {
+  display: grid;
+  gap: 8px;
+}
+
+.shelf-section h3,
+.shelf-section .card-meta {
+  margin: 0;
+}
+
 .shelf-item-card .card-title {
   font-size: 14px;
 }
@@ -436,7 +534,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1 1 calc(33.333% - 8px);
+  flex: 0 1 calc(33.333% - 8px);
   min-width: 260px;
 }
 
@@ -512,6 +610,13 @@ h1 {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.season-overview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  overflow: hidden;
 }
 
 .episode-tile {

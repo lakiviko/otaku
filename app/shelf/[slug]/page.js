@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShelfBySlug } from "@/lib/shelves";
 import { getTitleCardsByRefs } from "@/lib/tmdb";
+import { PageHeader } from "@/components/header-context";
 
 export default async function ShelfPage({ params }) {
   const { slug } = await params;
@@ -15,22 +16,14 @@ export default async function ShelfPage({ params }) {
   const cardsByRef = await getTitleCardsByRefs(allRefs, "ru-RU");
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Shelf</p>
-        <h1>{shelf.name}</h1>
-        <div className="badges">
-          <Link href="/" className="badge">← Все полки</Link>
-          <Link href="/search" className="badge">Поиск</Link>
-        </div>
-        <p className="subtitle">{shelf.overview || "Без описания"}</p>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Полка" title={shelf.name} />
       <section className="details">
         <div className="details-content">
+          {shelf.overview ? <p className="card-meta">{shelf.overview}</p> : null}
           {shelf.lists.length ? (
             shelf.lists.map((list) => (
-              <section key={list.key}>
+              <section className="shelf-section" key={list.key}>
                 <h3>{list.name}</h3>
                 {list.overview ? <p className="card-meta">{list.overview}</p> : null}
                 <div className="shelf-items-grid">

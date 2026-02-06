@@ -1,19 +1,13 @@
 import Link from "next/link";
 import { getAllShelves } from "@/lib/shelves";
+import { PageHeader } from "@/components/header-context";
 
 export default async function HomePage() {
   const shelves = await getAllShelves();
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Otaku Catalog</p>
-        <h1>Мои полки</h1>
-        <div className="badges">
-          <Link href="/search" className="badge">Перейти в поиск</Link>
-        </div>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Otaku Catalog" title="Мои полки" />
       <section className="results-wrap">
         {shelves.length ? (
           <div className="shelves-grid">

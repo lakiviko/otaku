@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import { PageHeader } from "@/components/header-context";
 
 export default function PersonPage({ params }) {
   const { id } = use(params);
@@ -33,11 +34,11 @@ export default function PersonPage({ params }) {
 
   if (!person) {
     return (
-      <main className="app">
-        <header className="hero">
-          <Link href="/" className="badge">← Назад</Link>
+      <main>
+        <PageHeader eyebrow="Персона" title="Загрузка..." />
+        <section className="results-wrap">
           <p className="status">{status}</p>
-        </header>
+        </section>
       </main>
     );
   }
@@ -50,14 +51,8 @@ export default function PersonPage({ params }) {
   ].filter(Boolean);
 
   return (
-    <main className="app">
-      <header className="hero">
-        <p className="eyebrow">Person</p>
-        <h1>{person.name}</h1>
-        <Link href="/" className="badge">На Гравную</Link>
-        <Link href="/" className="badge">Перейти в поиск</Link>
-      </header>
-
+    <main>
+      <PageHeader eyebrow="Персона" title={person.name} />
       <section className="details">
         <div className="details-content">
           <article className="person-layout">
