@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Suspense } from "react";
 import { HeaderProvider } from "@/components/header-context";
 import SiteHeader from "@/components/site-header";
 
@@ -15,7 +16,9 @@ export default function RootLayout({ children }) {
         <div className="noise" />
         <HeaderProvider initial={{ eyebrow: "Otaku Catalog", title: "Мои полки" }}>
           <div className="app">
-            <SiteHeader />
+            <Suspense fallback={null}>
+              <SiteHeader />
+            </Suspense>
             {children}
           </div>
         </HeaderProvider>
