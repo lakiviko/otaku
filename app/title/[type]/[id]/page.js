@@ -52,6 +52,7 @@ export default function TitlePage({ params }) {
   const genres = (data.genres || []).map((genre) => genre.name).join(", ") || "—";
   const countries = (data.countries || []).map((country) => country.name).join(", ") || "—";
   const runtime = data.runtime ? `${data.runtime} мин` : "—";
+  const creators = data.creators || [];
   const topCast = data.cast || [];
   const mediaVideos = [];
   const mediaBackdrops = data.popularMedia?.backdrops || [];
@@ -122,6 +123,33 @@ export default function TitlePage({ params }) {
             <div className="meta-item"><span className="meta-label">Страна</span><p>{countries}</p></div>
             <div className="meta-item"><span className="meta-label">Оценок</span><p>{formatNumber(data.voteCount, 0)}</p></div>
           </div>
+
+          {creators.length ? (
+            <section>
+              <h3>Создатели</h3>
+              <div className="cast">
+                {creators.map((person, index) => {
+                  const content = (
+                    <>
+                      <img src={person.profile || "/icons/placeholder-profile.svg"} alt={person.name} loading="lazy" />
+                      <h4>{person.name}</h4>
+                      <p>{person.role}</p>
+                    </>
+                  );
+
+                  return person.id ? (
+                    <Link href={`/person/${person.id}`} className="cast-card cast-link" key={`${person.role}-${person.id}-${index}`}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <article className="cast-card" key={`${person.role}-${person.name}-${index}`}>
+                      {content}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
 
           {isTv ? (
             <section>
