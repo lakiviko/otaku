@@ -3,6 +3,26 @@ import { notFound } from "next/navigation";
 import { getShelfBySlug } from "@/lib/shelves";
 import { getTitleCardsByRefs } from "@/lib/tmdb";
 import { PageHeader } from "@/components/header-context";
+import { buildPageMetadata, trimDescription } from "@/lib/seo";
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const shelf = await getShelfBySlug(slug);
+
+  if (!shelf) {
+    return buildPageMetadata({
+      title: "Полка не найдена | Otaku",
+      description: "Запрошенная полка не найдена в каталоге Otaku.",
+      path: `/shelf/${slug}`
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${shelf.name} | Otaku`,
+    description: trimDescription(shelf.overview || `Подборка "${shelf.name}" в каталоге Otaku.`),
+    path: `/shelf/${slug}`
+  });
+}
 
 export default async function ShelfPage({ params }) {
   const { slug } = await params;

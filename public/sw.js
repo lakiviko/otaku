@@ -1,5 +1,17 @@
-const CACHE_NAME = "otaku-static-v2";
-const STATIC_ASSETS = ["/", "/styles.css", "/app.js", "/manifest.webmanifest", "/icons/icon-192.svg", "/icons/icon-512.svg"];
+const CACHE_NAME = "otaku-static-v3";
+const STATIC_ASSETS = [
+  "/",
+  "/styles.css",
+  "/app.js",
+  "/site.webmanifest",
+  "/manifest.webmanifest",
+  "/favicon.ico",
+  "/favicon-16x16.png",
+  "/favicon-32x32.png",
+  "/apple-touch-icon.png",
+  "/android-chrome-192x192.png",
+  "/android-chrome-512x512.png"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

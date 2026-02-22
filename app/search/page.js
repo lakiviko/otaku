@@ -1,5 +1,12 @@
 import { Suspense } from "react";
 import SearchClientPage from "./search-client";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "Поиск | Otaku",
+  description: "Поиск фильмов, сериалов и персон в каталоге Otaku.",
+  path: "/search"
+});
 
 export default function SearchPage() {
   return (

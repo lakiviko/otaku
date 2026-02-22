@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { getAllShelves } from "@/lib/shelves";
 import { PageHeader } from "@/components/header-context";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata({
+  title: "Otaku Catalog",
+  description: "Личный каталог фильмов, сериалов и аниме на базе TMDB.",
+  path: "/"
+});
 
 export default async function HomePage() {
   const shelves = await getAllShelves();
