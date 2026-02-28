@@ -57,6 +57,10 @@
    - `npm install`
 2. Создать `.env`:
    - `TMDB_API_KEY=...`
+   - `AUTH_SECRET=...` (длинная случайная строка для подписи auth-cookie)
+   - `GITHUB_CLIENT_ID=...` (OAuth App / GitHub App client id)
+   - `GITHUB_CLIENT_SECRET=...`
+   - `GITHUB_ALLOWED_LOGIN=your-github-login` (кто может войти)
    - `PORT=3000` (опционально)
 3. Запустить:
    - `npm run dev`
@@ -84,3 +88,9 @@ Workflow: `.github/workflows/build.yml`
 - теги: branch, sha, `latest` (для default branch)
 
 Для публикации достаточно пуша в `main`/`master` или ручного запуска workflow.
+
+## Авторизация (только для владельца)
+
+- Вход делается через GitHub OAuth (`/api/auth/github/start`).
+- Доступ дается только логинам из `GITHUB_ALLOWED_LOGIN` (или `GITHUB_ALLOWED_LOGINS` через запятую).
+- Страница редактора полки `/shelf/:slug/edit` закрыта и требует входа.

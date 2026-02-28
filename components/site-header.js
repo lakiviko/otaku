@@ -87,10 +87,12 @@ export default function SiteHeader() {
 
   return (
     <header className={`hero site-header${mobileSearchOpen ? " search-open" : ""}`}>
-      <Link href="/" className="hero-main">
-        <p className="eyebrow">{header.eyebrow}</p>
-        <h1>{header.title}</h1>
-      </Link>
+      <div className="hero-main">
+        <Link href="/" className="hero-main-link">
+          <p className="eyebrow">{header.eyebrow}</p>
+          <h1>{header.title}</h1>
+        </Link>
+      </div>
       {!mobileSearchOpen ? (
         <button
           className="search-toggle"

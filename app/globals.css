@@ -67,6 +67,11 @@ a {
   gap: 0;
 }
 
+.hero-main-link {
+  display: grid;
+  gap: 0;
+}
+
 .search-toggle {
   display: none;
   border: 0;

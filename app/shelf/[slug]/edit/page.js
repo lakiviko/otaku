@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/header-context";
+import { getServerAuthSession } from "@/lib/github-auth";
 import { getShelfBySlug } from "@/lib/shelves";
 import ShelfEditClient from "./shelf-edit-client";
 
 export default async function ShelfEditPage({ params }) {
   const { slug } = await params;
+  const viewer = await getServerAuthSession();
+  if (!viewer) {
+    redirect(`/login?next=${encodeURIComponent(`/shelf/${slug}/edit`)}`);
+  }
+
   const shelf = await getShelfBySlug(slug);
 
   if (!shelf) {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getShelfBySlug } from "@/lib/shelves";
 import { getTitleCardsByRefs } from "@/lib/tmdb";
+import { getServerAuthSession } from "@/lib/github-auth";
 import { PageHeader } from "@/components/header-context";
 import { buildPageMetadata, trimDescription } from "@/lib/seo";
 
@@ -26,6 +27,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ShelfPage({ params }) {
   const { slug } = await params;
+  const viewer = await getServerAuthSession();
   const shelf = await getShelfBySlug(slug);
 
   if (!shelf) {
@@ -79,6 +81,11 @@ export default async function ShelfPage({ params }) {
           ) : (
             <p className="season-empty">В этой полке пока нет разделов.</p>
           )}
+          {viewer ? (
+            <p className="badges">
+              <Link href={`/shelf/${slug}/edit`} className="badge">Редактировать полку</Link>
+            </p>
+          ) : null}
         </div>
       </section>
     </main>
