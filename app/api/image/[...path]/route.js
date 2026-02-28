@@ -10,8 +10,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "invalid image path" }, { status: 400 });
     }
 
-    const userAgent = request.headers.get("user-agent") || "";
-    const image = await getProxiedImage(path, userAgent);
+    const image = await getProxiedImage(path);
     return new NextResponse(image.data, {
       headers: {
         "Content-Type": image.contentType,
