@@ -30,6 +30,14 @@ export default function ShelfEditClient({ initialData }) {
   const [copyError, setCopyError] = useState("");
   const [metaByRef, setMetaByRef] = useState({});
   const inFlight = useRef(new Set());
+  const justDraggedRef = useRef(false);
+  const [dragState, setDragState] = useState({
+    fromListIndex: null,
+    fromItemIndex: null,
+    overListIndex: null,
+    overItemIndex: null,
+    overEnd: false
+  });
 
   const [modal, setModal] = useState({
     open: false,
@@ -204,6 +212,181 @@ export default function ShelfEditClient({ initialData }) {
     }));
   }
 
+  function moveListItem(fromListIndex, fromItemIndex, toListIndex, toItemIndex) {
+    setState((prev) => {
+      if (
+        fromListIndex === null ||
+        fromItemIndex === null ||
+        toListIndex === null ||
+        toItemIndex === null
+      ) {
+        return prev;
+      }
+
+      const sourceList = prev.lists[fromListIndex];
+      const targetList = prev.lists[toListIndex];
+      if (!sourceList || !targetList) return prev;
+      if (fromItemIndex < 0 || fromItemIndex >= sourceList.items.length) return prev;
+
+      const sourceItems = [...sourceList.items];
+      const [moved] = sourceItems.splice(fromItemIndex, 1);
+      if (!moved) return prev;
+
+      const targetItems = fromListIndex === toListIndex ? sourceItems : [...targetList.items];
+      const normalizedIndex = Math.max(0, Math.min(toItemIndex, targetItems.length));
+      const insertIndex =
+        fromListIndex === toListIndex && normalizedIndex > fromItemIndex ? normalizedIndex - 1 : normalizedIndex;
+
+      if (fromListIndex === toListIndex && insertIndex === fromItemIndex) return prev;
+
+      targetItems.splice(insertIndex, 0, moved);
+
+      return {
+        ...prev,
+        lists: prev.lists.map((list, index) => {
+          if (index === fromListIndex && index === toListIndex) {
+            return { ...list, items: targetItems };
+          }
+          if (index === fromListIndex) {
+            return { ...list, items: sourceItems };
+          }
+          if (index === toListIndex) {
+            return { ...list, items: targetItems };
+          }
+          return list;
+        })
+      };
+    });
+  }
+
+  function moveListItemToEnd(fromListIndex, fromItemIndex, toListIndex) {
+    setState((prev) => {
+      if (fromListIndex === null || fromItemIndex === null || toListIndex === null) return prev;
+
+      const sourceList = prev.lists[fromListIndex];
+      const targetList = prev.lists[toListIndex];
+      if (!sourceList || !targetList) return prev;
+      if (fromItemIndex < 0 || fromItemIndex >= sourceList.items.length) return prev;
+
+      const sourceItems = [...sourceList.items];
+      const [moved] = sourceItems.splice(fromItemIndex, 1);
+      if (!moved) return prev;
+
+      const targetItems = fromListIndex === toListIndex ? sourceItems : [...targetList.items];
+      if (fromListIndex === toListIndex && fromItemIndex === sourceList.items.length - 1) return prev;
+      targetItems.push(moved);
+
+      return {
+        ...prev,
+        lists: prev.lists.map((list, index) => {
+          if (index === fromListIndex && index === toListIndex) {
+            return { ...list, items: targetItems };
+          }
+          if (index === fromListIndex) {
+            return { ...list, items: sourceItems };
+          }
+          if (index === toListIndex) {
+            return { ...list, items: targetItems };
+          }
+          return list;
+        })
+      };
+    });
+  }
+
+  function resetDragState() {
+    setDragState({
+      fromListIndex: null,
+      fromItemIndex: null,
+      overListIndex: null,
+      overItemIndex: null,
+      overEnd: false
+    });
+  }
+
+  function handleDragStart(event, listIndex, itemIndex) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", "");
+    setDragState({
+      fromListIndex: listIndex,
+      fromItemIndex: itemIndex,
+      overListIndex: listIndex,
+      overItemIndex: itemIndex,
+      overEnd: false
+    });
+  }
+
+  function handleDragOverItem(event, listIndex, itemIndex) {
+    if (dragState.fromListIndex === null || dragState.fromItemIndex === null) return;
+    event.preventDefault();
+
+    if (
+      dragState.overListIndex !== listIndex ||
+      dragState.overItemIndex !== itemIndex ||
+      dragState.overEnd
+    ) {
+      setDragState((prev) => ({
+        ...prev,
+        overListIndex: listIndex,
+        overItemIndex: itemIndex,
+        overEnd: false
+      }));
+    }
+  }
+
+  function handleDropOnItem(event, listIndex, itemIndex) {
+    event.preventDefault();
+    if (dragState.fromListIndex === null || dragState.fromItemIndex === null) {
+      resetDragState();
+      return;
+    }
+
+    moveListItem(dragState.fromListIndex, dragState.fromItemIndex, listIndex, itemIndex);
+    justDraggedRef.current = true;
+    resetDragState();
+  }
+
+  function handleDragOverEnd(event, listIndex) {
+    if (dragState.fromListIndex === null || dragState.fromItemIndex === null) return;
+    event.preventDefault();
+
+    if (
+      dragState.overListIndex !== listIndex ||
+      !dragState.overEnd
+    ) {
+      setDragState((prev) => ({
+        ...prev,
+        overListIndex: listIndex,
+        overItemIndex: null,
+        overEnd: true
+      }));
+    }
+  }
+
+  function handleDropOnEnd(event, listIndex) {
+    event.preventDefault();
+    if (dragState.fromListIndex === null || dragState.fromItemIndex === null) {
+      resetDragState();
+      return;
+    }
+
+    moveListItemToEnd(dragState.fromListIndex, dragState.fromItemIndex, listIndex);
+    justDraggedRef.current = true;
+    resetDragState();
+  }
+
+  function handleDragEnd() {
+    resetDragState();
+    setTimeout(() => {
+      justDraggedRef.current = false;
+    }, 0);
+  }
+
+  function handleCoverClick(listIndex, itemIndex) {
+    if (justDraggedRef.current) return;
+    openItemModal(listIndex, itemIndex);
+  }
+
   async function copyJsonc() {
     try {
       await navigator.clipboard.writeText(jsonc);
@@ -277,9 +460,24 @@ export default function ShelfEditClient({ initialData }) {
                 return (
                   <button
                     type="button"
-                    className="shelf-edit-cover"
+                    className={[
+                      "shelf-edit-cover",
+                      dragState.fromListIndex === listIndex && dragState.fromItemIndex === itemIndex
+                        ? "shelf-edit-cover--dragging"
+                        : "",
+                      dragState.overListIndex === listIndex &&
+                      dragState.overItemIndex === itemIndex &&
+                      !dragState.overEnd
+                        ? "shelf-edit-cover--drop-target"
+                        : ""
+                    ].filter(Boolean).join(" ")}
                     key={`${list.uid}-${itemIndex}-${ref}`}
-                    onClick={() => openItemModal(listIndex, itemIndex)}
+                    draggable
+                    onDragStart={(event) => handleDragStart(event, listIndex, itemIndex)}
+                    onDragOver={(event) => handleDragOverItem(event, listIndex, itemIndex)}
+                    onDrop={(event) => handleDropOnItem(event, listIndex, itemIndex)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => handleCoverClick(listIndex, itemIndex)}
                   >
                     <img src={poster} alt={title} loading="lazy" />
                     <div className="shelf-edit-cover-meta">
@@ -290,7 +488,17 @@ export default function ShelfEditClient({ initialData }) {
                 );
               })}
 
-              <button type="button" className="shelf-edit-cover shelf-edit-cover-phantom" onClick={() => openAddModal(listIndex)}>
+              <button
+                type="button"
+                className={[
+                  "shelf-edit-cover",
+                  "shelf-edit-cover-phantom",
+                  dragState.overListIndex === listIndex && dragState.overEnd ? "shelf-edit-cover--drop-target" : ""
+                ].filter(Boolean).join(" ")}
+                onClick={() => openAddModal(listIndex)}
+                onDragOver={(event) => handleDragOverEnd(event, listIndex)}
+                onDrop={(event) => handleDropOnEnd(event, listIndex)}
+              >
                 <div className="shelf-edit-cover-plus">+</div>
                 <div className="shelf-edit-cover-meta">
                   <strong>Добавить</strong>
