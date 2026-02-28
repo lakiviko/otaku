@@ -3,6 +3,7 @@ import {
   createSessionToken,
   exchangeGitHubCodeForToken,
   fetchGitHubViewer,
+  getAppOrigin,
   getOAuthStateCookieName,
   getSessionCookieConfig,
   getSessionCookieName,
@@ -11,7 +12,8 @@ import {
 } from "@/lib/github-auth";
 
 function redirectWithError(request, reason) {
-  const url = new URL("/", request.nextUrl.origin);
+  const appOrigin = getAppOrigin(request.nextUrl.origin);
+  const url = new URL("/", appOrigin);
   url.searchParams.set("auth", reason);
   const response = NextResponse.redirect(url);
   response.cookies.set(getOAuthStateCookieName(), "", getSessionCookieConfig(0));
@@ -19,6 +21,7 @@ function redirectWithError(request, reason) {
 }
 
 export async function GET(request) {
+  const appOrigin = getAppOrigin(request.nextUrl.origin);
   const code = String(request.nextUrl.searchParams.get("code") || "").trim();
   const state = String(request.nextUrl.searchParams.get("state") || "").trim();
   if (!code || !state) {
@@ -43,7 +46,7 @@ export async function GET(request) {
     }
 
     const sessionToken = createSessionToken(viewer);
-    const redirectUrl = new URL(statePayload.nextPath || "/", request.nextUrl.origin);
+    const redirectUrl = new URL(statePayload.nextPath || "/", appOrigin);
     const response = NextResponse.redirect(redirectUrl);
     response.cookies.set(getOAuthStateCookieName(), "", getSessionCookieConfig(0));
     response.cookies.set(getSessionCookieName(), sessionToken, getSessionCookieConfig(60 * 60 * 24 * 30));

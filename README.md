@@ -61,6 +61,7 @@
    - `GITHUB_CLIENT_ID=...` (OAuth App / GitHub App client id)
    - `GITHUB_CLIENT_SECRET=...`
    - `GITHUB_ALLOWED_LOGIN=your-github-login` (кто может войти)
+   - `HOST_URI=https://your-domain.example` (опционально: базовый URL для OAuth callback/redirect)
    - `PORT=3000` (опционально)
 3. Запустить:
    - `npm run dev`

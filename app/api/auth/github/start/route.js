@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   createOAuthState,
+  getAppOrigin,
   getOAuthStateCookieName,
   getSessionCookieConfig
 } from "@/lib/github-auth";
@@ -14,7 +15,8 @@ export async function GET(request) {
   const nextPath = request.nextUrl.searchParams.get("next") || "/";
   const stateToken = createOAuthState(nextPath);
 
-  const callbackUrl = new URL("/api/auth/github/callback", request.nextUrl.origin);
+  const appOrigin = getAppOrigin(request.nextUrl.origin);
+  const callbackUrl = new URL("/api/auth/github/callback", appOrigin);
   const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
   githubAuthUrl.searchParams.set("client_id", clientId);
   githubAuthUrl.searchParams.set("redirect_uri", callbackUrl.toString());
