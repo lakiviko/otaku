@@ -28,6 +28,9 @@ export default function ShelfEditClient({ initialData }) {
   const [state, setState] = useState(() => normalizeInitialState(initialData));
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
+  const [commitPending, setCommitPending] = useState(false);
+  const [commitError, setCommitError] = useState("");
+  const [commitInfo, setCommitInfo] = useState(null);
   const [metaByRef, setMetaByRef] = useState({});
   const inFlight = useRef(new Set());
   const justDraggedRef = useRef(false);
@@ -398,6 +401,33 @@ export default function ShelfEditClient({ initialData }) {
     }
   }
 
+  async function commitToGitHub() {
+    setCommitPending(true);
+    setCommitError("");
+    setCommitInfo(null);
+
+    try {
+      const response = await fetch(`/api/shelf/${encodeURIComponent(state.slug)}/commit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: jsonc })
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || payload.error || "Commit failed");
+      }
+
+      setCommitInfo({
+        sha: payload.sha || null,
+        commitUrl: payload.commitUrl || null
+      });
+    } catch (error) {
+      setCommitError(error instanceof Error ? error.message : "Не удалось выполнить commit.");
+    } finally {
+      setCommitPending(false);
+    }
+  }
+
   return (
     <div className="shelf-edit">
       <div className="shelf-edit-grid">
@@ -512,10 +542,30 @@ export default function ShelfEditClient({ initialData }) {
       <div className="shelf-edit-footer">
         <button type="button" className="shelf-edit-add-list" onClick={addList}>+ Добавить тему</button>
         <button type="button" className="badge shelf-edit-copy" onClick={copyJsonc}>Скопировать JSONC</button>
+        <button
+          type="button"
+          className="badge shelf-edit-copy"
+          onClick={commitToGitHub}
+          disabled={commitPending}
+        >
+          {commitPending ? "Коммит..." : "Commit в GitHub"}
+        </button>
       </div>
 
       {copied ? <p className="status">Скопировано в буфер обмена.</p> : null}
       {copyError ? <p className="status">{copyError}</p> : null}
+      {commitError ? <p className="status">{commitError}</p> : null}
+      {commitInfo ? (
+        <p className="status">
+          Commit создан{commitInfo.sha ? `: ${commitInfo.sha.slice(0, 7)}` : "."}
+          {commitInfo.commitUrl ? (
+            <>
+              {" "}
+              <a href={commitInfo.commitUrl} target="_blank" rel="noreferrer">Открыть в GitHub</a>
+            </>
+          ) : null}
+        </p>
+      ) : null}
 
       <details className="shelf-edit-preview">
         <summary>Предпросмотр JSONC</summary>

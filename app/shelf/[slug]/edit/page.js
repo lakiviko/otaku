@@ -39,7 +39,7 @@ export default async function ShelfEditPage({ params }) {
             <Link href={`/shelf/${slug}`} className="badge">Назад к полке</Link>
           </div>
           <p className="card-meta">
-            Изменения здесь не сохраняются в файл автоматически. В конце нажми "Скопировать JSONC" и вставь результат в GitHub.
+            Можно скопировать JSONC вручную или сразу нажать "Commit в GitHub" для автоматической записи файла полки.
           </p>
           <ShelfEditClient initialData={initialData} />
         </div>

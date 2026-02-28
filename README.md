@@ -50,6 +50,7 @@
 - `GET /api/title/tv/:id/season/:seasonNumber?language=ru-RU`
 - `GET /api/person/:id?language=ru-RU`
 - `GET /api/image/:size/:path`
+- `POST /api/shelf/:slug/commit` (требует авторизацию)
 
 ## Локальный запуск
 
@@ -62,6 +63,14 @@
    - `GITHUB_CLIENT_SECRET=...`
    - `GITHUB_ALLOWED_LOGIN=your-github-login` (кто может войти)
    - `HOST_URI=https://your-domain.example` (опционально: базовый URL для OAuth callback/redirect)
+   - `GITHUB_APP_ID=...` (GitHub App ID для server-to-server токена)
+   - `GITHUB_APP_PRIVATE_KEY=...` (PEM ключ; можно одной строкой с `\n`)
+   - `GITHUB_APP_INSTALLATION_ID=...`
+   - `GITHUB_REPO_OWNER=...`
+   - `GITHUB_REPO_NAME=...`
+   - `GITHUB_REPO_BRANCH=main` (опционально)
+   - `GITHUB_COMMITTER_NAME=Otaku Bot` (опционально)
+   - `GITHUB_COMMITTER_EMAIL=otaku-bot@users.noreply.github.com` (опционально)
    - `PORT=3000` (опционально)
 3. Запустить:
    - `npm run dev`
