@@ -11,8 +11,7 @@ import {
   readOAuthState
 } from "@/lib/github-auth";
 
-function redirectWithError(request, reason) {
-  const appOrigin = getAppOrigin(request.nextUrl.origin);
+function redirectWithError(appOrigin, reason) {
   const url = new URL("/", appOrigin);
   url.searchParams.set("auth", reason);
   const response = NextResponse.redirect(url);
@@ -21,28 +20,28 @@ function redirectWithError(request, reason) {
 }
 
 export async function GET(request) {
-  const appOrigin = getAppOrigin(request.nextUrl.origin);
+  const appOrigin = getAppOrigin();
   const code = String(request.nextUrl.searchParams.get("code") || "").trim();
   const state = String(request.nextUrl.searchParams.get("state") || "").trim();
   if (!code || !state) {
-    return redirectWithError(request, "missing_oauth_params");
+    return redirectWithError(appOrigin, "missing_oauth_params");
   }
 
   const cookieState = request.cookies.get(getOAuthStateCookieName())?.value || "";
   if (!cookieState || cookieState !== state) {
-    return redirectWithError(request, "invalid_oauth_state");
+    return redirectWithError(appOrigin, "invalid_oauth_state");
   }
 
   const statePayload = readOAuthState(state);
   if (!statePayload) {
-    return redirectWithError(request, "expired_oauth_state");
+    return redirectWithError(appOrigin, "expired_oauth_state");
   }
 
   try {
     const token = await exchangeGitHubCodeForToken(code);
     const viewer = await fetchGitHubViewer(token);
     if (!isAllowedGitHubUser(viewer)) {
-      return redirectWithError(request, "not_allowed");
+      return redirectWithError(appOrigin, "not_allowed");
     }
 
     const sessionToken = createSessionToken(viewer);
@@ -52,7 +51,7 @@ export async function GET(request) {
     response.cookies.set(getSessionCookieName(), sessionToken, getSessionCookieConfig(60 * 60 * 24 * 30));
     return response;
   } catch (error) {
-    const response = redirectWithError(request, "oauth_failed");
+    const response = redirectWithError(appOrigin, "oauth_failed");
     response.headers.set("X-Auth-Error", error instanceof Error ? error.message : "unknown");
     return response;
   }

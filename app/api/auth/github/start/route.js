@@ -15,7 +15,7 @@ export async function GET(request) {
   const nextPath = request.nextUrl.searchParams.get("next") || "/";
   const stateToken = createOAuthState(nextPath);
 
-  const appOrigin = getAppOrigin(request.nextUrl.origin);
+  const appOrigin = getAppOrigin();
   const callbackUrl = new URL("/api/auth/github/callback", appOrigin);
   const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
   githubAuthUrl.searchParams.set("client_id", clientId);
